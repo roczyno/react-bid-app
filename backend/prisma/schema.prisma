@@ -1,0 +1,189 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                String   @id @default(cuid())
+  email             String   @unique
+  password          String
+  firstName         String
+  lastName          String
+  phone             String?
+  avatar            String?
+  isEmailVerified   Boolean  @default(false)
+  emailVerifyToken  String?
+  resetPasswordToken String?
+  resetPasswordExpires DateTime?
+  subscriptionTier  SubscriptionTier @default(BASIC)
+  subscriptionExpires DateTime?
+  stripeCustomerId  String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  // Relations
+  auctions          Auction[]
+  bids              Bid[]
+  sentMessages      Message[] @relation("MessageSender")
+  receivedMessages  Message[] @relation("MessageReceiver")
+  payments          Payment[]
+  notifications     Notification[]
+
+  @@map("users")
+}
+
+model Auction {
+  id              String        @id @default(cuid())
+  title           String
+  description     String
+  startingPrice   Decimal       @db.Decimal(10, 2)
+  currentPrice    Decimal       @db.Decimal(10, 2)
+  buyNowPrice     Decimal?      @db.Decimal(10, 2)
+  reservePrice    Decimal?      @db.Decimal(10, 2)
+  startTime       DateTime
+  endTime         DateTime
+  status          AuctionStatus @default(ACTIVE)
+  images          String[]
+  
+  // Vehicle details
+  make            String
+  model           String
+  year            Int
+  mileage         Int?
+  condition       VehicleCondition
+  fuelType        String?
+  transmission    String?
+  color           String?
+  vin             String?
+  
+  // Location
+  location        String
+  
+  // Seller
+  sellerId        String
+  seller          User          @relation(fields: [sellerId], references: [id], onDelete: Cascade)
+  
+  // Relations
+  bids            Bid[]
+  messages        Message[]
+  
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  @@map("auctions")
+}
+
+model Bid {
+  id        String   @id @default(cuid())
+  amount    Decimal  @db.Decimal(10, 2)
+  timestamp DateTime @default(now())
+  
+  // Relations
+  auctionId String
+  auction   Auction  @relation(fields: [auctionId], references: [id], onDelete: Cascade)
+  bidderId  String
+  bidder    User     @relation(fields: [bidderId], references: [id], onDelete: Cascade)
+  
+  @@map("bids")
+}
+
+model Message {
+  id        String      @id @default(cuid())
+  content   String
+  timestamp DateTime    @default(now())
+  type      MessageType @default(TEXT)
+  
+  // Relations
+  senderId    String
+  sender      User    @relation("MessageSender", fields: [senderId], references: [id], onDelete: Cascade)
+  receiverId  String
+  receiver    User    @relation("MessageReceiver", fields: [receiverId], references: [id], onDelete: Cascade)
+  auctionId   String?
+  auction     Auction? @relation(fields: [auctionId], references: [id], onDelete: Cascade)
+  
+  @@map("messages")
+}
+
+model Payment {
+  id              String        @id @default(cuid())
+  amount          Decimal       @db.Decimal(10, 2)
+  currency        String        @default("usd")
+  status          PaymentStatus @default(PENDING)
+  stripePaymentId String?
+  description     String?
+  
+  // Relations
+  userId          String
+  user            User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  
+  @@map("payments")
+}
+
+model Notification {
+  id        String           @id @default(cuid())
+  title     String
+  message   String
+  type      NotificationType
+  isRead    Boolean          @default(false)
+  
+  // Relations
+  userId    String
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  createdAt DateTime         @default(now())
+  
+  @@map("notifications")
+}
+
+enum SubscriptionTier {
+  BASIC
+  STANDARD
+  PREMIUM
+}
+
+enum AuctionStatus {
+  DRAFT
+  ACTIVE
+  ENDED
+  CANCELLED
+}
+
+enum VehicleCondition {
+  EXCELLENT
+  GOOD
+  FAIR
+  POOR
+}
+
+enum MessageType {
+  TEXT
+  IMAGE
+  SYSTEM
+}
+
+enum PaymentStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  REFUNDED
+}
+
+enum NotificationType {
+  BID_PLACED
+  BID_OUTBID
+  AUCTION_WON
+  AUCTION_ENDED
+  MESSAGE_RECEIVED
+  PAYMENT_SUCCESS
+  PAYMENT_FAILED
+}
