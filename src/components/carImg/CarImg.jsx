@@ -1,21 +1,50 @@
-/* eslint-disable react/prop-types */
 import "./carImg.scss";
-import Car1 from "../../assets/carImg1.png";
-import Car2 from "../../assets/carImg2.png";
 
-// eslint-disable-next-line react/prop-types
 const CarImg = ({ auction }) => {
+  const images = auction?.images || [];
+  const defaultImage = "https://images.pexels.com/photos/164634/pexels-photo-164634.jpeg";
+
   return (
     <div className="CarImg">
       <div className="carImg">
         <div className="firstImg">
-          <img src={auction.content?.images} alt="" />
+          <img 
+            src={images[0] || defaultImage} 
+            alt={auction?.title || "Car"}
+            onError={(e) => {
+              e.target.src = defaultImage;
+            }}
+          />
         </div>
         <div className="others">
-          <img src={Car1} alt="" />
+          {images.length > 1 && (
+            <img 
+              src={images[1] || defaultImage} 
+              alt={auction?.title || "Car"}
+              onError={(e) => {
+                e.target.src = defaultImage;
+              }}
+            />
+          )}
           <div className="item">
-            <img src={auction.content?.images} alt="" />
-            <img src={Car2} alt="" />
+            {images.length > 2 && (
+              <img 
+                src={images[2] || defaultImage} 
+                alt={auction?.title || "Car"}
+                onError={(e) => {
+                  e.target.src = defaultImage;
+                }}
+              />
+            )}
+            {images.length > 3 && (
+              <img 
+                src={images[3] || defaultImage} 
+                alt={auction?.title || "Car"}
+                onError={(e) => {
+                  e.target.src = defaultImage;
+                }}
+              />
+            )}
           </div>
         </div>
       </div>

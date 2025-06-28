@@ -2,7 +2,7 @@ import "./register.scss";
 import { Link, useNavigate } from "react-router-dom";
 import { Google, Facebook, Twitter } from "@mui/icons-material";
 import { useState } from "react";
-import { publicRequest } from "../../requestMethods";
+import { register } from "../../redux/apiCalls";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -11,40 +11,46 @@ const Register = () => {
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [ConfirmPassword, setConfirmPassword] = useState("");
-  const [error, setError] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [phone, setPhone] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
   const navigate = useNavigate();
 
   const handleRegister = async (e) => {
     e.preventDefault();
+    
+    if (password !== confirmPassword) {
+      toast.error("Passwords do not match");
+      return;
+    }
+
+    if (password.length < 6) {
+      toast.error("Password must be at least 6 characters");
+      return;
+    }
+
+    setIsLoading(true);
     try {
-      if (password !== ConfirmPassword) {
-        setError("Passwords do not match");
-        return;
-      }
-      const res = await publicRequest.post("/auth/register", {
+      await register({
         firstName,
         lastName,
         email,
         password,
+        phone
       });
       navigate("/login");
-      res.data && toast(res.data.message);
     } catch (error) {
-      if (
-        error.response &&
-        error.response.status >= 400 &&
-        error.response.status <= 500
-      ) {
-        toast(error.response.data[0].error);
-      }
+      console.error("Registration error:", error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const google = () => {
-    window.open("http://localhost:5000/api/auth/google", "_self");
+    toast.info("Google registration not implemented yet");
   };
+
   return (
     <div className="register">
       <ToastContainer />
@@ -53,31 +59,49 @@ const Register = () => {
           <h4>Sign up</h4>
           <input
             type="text"
-            placeholder="firstName"
+            placeholder="First Name"
+            value={firstName}
             onChange={(e) => setFirstName(e.target.value)}
+            required
           />
           <input
             type="text"
-            placeholder="lastName"
+            placeholder="Last Name"
+            value={lastName}
             onChange={(e) => setLastName(e.target.value)}
+            required
           />
           <input
             type="email"
             placeholder="Email"
+            value={email}
             onChange={(e) => setEmail(e.target.value)}
+            required
+          />
+          <input
+            type="tel"
+            placeholder="Phone Number (optional)"
+            value={phone}
+            onChange={(e) => setPhone(e.target.value)}
           />
           <input
             type="password"
             placeholder="Your password"
+            value={password}
             onChange={(e) => setPassword(e.target.value)}
+            required
           />
           <input
             type="password"
             placeholder="Confirm your password"
+            value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
+            required
           />
 
-          <button type="submit">Sign up</button>
+          <button type="submit" disabled={isLoading}>
+            {isLoading ? "Signing up..." : "Sign up"}
+          </button>
 
           <div className="or-container">
             <div className="or">Or</div>
@@ -98,12 +122,9 @@ const Register = () => {
         </form>
         <div className="sign_in">
           <Link to="/login" className="link">
-            You dont have an account? Sign in here
+            Already have an account? Sign in here
           </Link>
         </div>
-        {error && (
-          <span style={{ color: "red", textAlign: "center" }}>{error}</span>
-        )}
       </div>
     </div>
   );

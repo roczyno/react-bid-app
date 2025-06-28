@@ -15,7 +15,6 @@
     "@mui/icons-material": "^5.14.19",
     "@mui/material": "^5.14.20",
     "@reduxjs/toolkit": "^2.0.1",
-    "@stomp/stompjs": "^7.0.0",
     "axios": "^1.6.2",
     "global": "^4.4.0",
     "include-media": "^2.0.0",
@@ -31,8 +30,7 @@
     "redux-persist": "^6.0.0",
     "sass": "^1.69.5",
     "slick-carousel": "^1.8.1",
-    "socket.io-client": "^4.7.5",
-    "sockjs-client": "^1.6.1"
+    "socket.io-client": "^4.7.5"
   },
   "devDependencies": {
     "@types/react": "^18.2.37",

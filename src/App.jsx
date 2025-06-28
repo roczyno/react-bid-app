@@ -16,9 +16,13 @@ import { useSelector } from "react-redux";
 import Subscription from "./pages/subscription/Subscription";
 import Chat from "./pages/chat/Chat";
 import Dashboard from "./pages/dashboard/Dashboard";
+import { useSocket } from "./hooks/useSocket";
 
 const App = () => {
   const user = useSelector((state) => state.user.currentUser);
+  
+  // Initialize socket connection
+  useSocket();
 
   const Layout = () => {
     return (
@@ -85,11 +89,11 @@ const App = () => {
         },
         {
           path: "/chat",
-          element: <Chat />,
+          element: user ? <Chat /> : <Login />,
         },
         {
           path: "/dashboard",
-          element: <Dashboard />,
+          element: user ? <Dashboard /> : <Login />,
         },
       ],
     },

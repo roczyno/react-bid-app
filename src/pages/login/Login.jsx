@@ -1,5 +1,5 @@
 import "./login.scss";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Google, Facebook, Twitter } from "@mui/icons-material";
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -11,13 +11,24 @@ const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const { isFetching } = useSelector((state) => state.user);
+
   const handleLogin = async (e) => {
     e.preventDefault();
-    login(dispatch, { email, password });
+    try {
+      await login(dispatch, { email, password });
+      navigate("/");
+    } catch (error) {
+      console.error("Login error:", error);
+    }
   };
 
-  const google = () => {};
+  const google = () => {
+    // Implement Google OAuth if needed
+    toast.info("Google login not implemented yet");
+  };
+
   return (
     <div className="login">
       <div className="container">
@@ -27,17 +38,21 @@ const Login = () => {
           <input
             type="email"
             placeholder="Email"
+            value={email}
             onChange={(e) => setEmail(e.target.value)}
+            required
           />
           <input
             type="password"
             placeholder="Your password"
+            value={password}
             onChange={(e) => setPassword(e.target.value)}
+            required
           />
           <div className="others">
             <div className="remember">
-              <input type="radio" />
-              <label htmlFor="" className="label">
+              <input type="checkbox" id="remember" />
+              <label htmlFor="remember" className="label">
                 Remember me
               </label>
             </div>
@@ -45,7 +60,9 @@ const Login = () => {
               <span>Recover password</span>
             </Link>
           </div>
-          <button>Sign in</button>
+          <button type="submit" disabled={isFetching}>
+            {isFetching ? "Signing in..." : "Sign in"}
+          </button>
 
           <div className="or-container">
             <div className="or">Or</div>

@@ -1,41 +1,39 @@
 import { useEffect, useState } from "react";
 import MyAuctions from "../../components/myAuctions/MyAuctions";
 import "./myAuctionsPage.scss";
-import { useSelector } from "react-redux";
-import { userRequest } from "../../requestMethods";
+import { getUserAuctions } from "../../redux/apiCalls";
+import { ToastContainer } from "react-toastify";
 
 const MyAuctionsPage = () => {
-  // const dispatch = useDispatch();
-  const auction = useSelector((state) => state.auction.auctions);
-  const [data, setData] = useState(auction.results);
+  const [data, setData] = useState([]);
   const [search, setSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState(null); // Initialize with null for all auctions
+  const [statusFilter, setStatusFilter] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  // useEffect(() => {
-  //   getAuctions(dispatch);
-  // }, [dispatch]);
-  // Function to fetch auctions based on search term and status filter
   const fetchAuctions = async () => {
     try {
-      const res = await userRequest.get(`/auction`, {
-        params: {
-          searchTerm: search,
-          status: statusFilter, // Pass status filter as query parameter
-        },
-      });
-      setData(res.data.content.content); // Assuming `content` contains auction data
+      setLoading(true);
+      const params = {};
+      if (search) params.search = search;
+      if (statusFilter) params.status = statusFilter;
+      
+      const response = await getUserAuctions(params);
+      setData(response.auctions || []);
     } catch (error) {
-      console.error("Error fetching auctions:", error);
+      console.error("Error fetching user auctions:", error);
+      setData([]);
+    } finally {
+      setLoading(false);
     }
   };
 
-  // Fetch auctions initially and whenever search term or status filter changes
   useEffect(() => {
     fetchAuctions();
   }, [search, statusFilter]);
 
   return (
     <div className="my_auctions">
+      <ToastContainer />
       <div className="container">
         <div className="filters">
           <span
@@ -51,21 +49,31 @@ const MyAuctionsPage = () => {
             Active auctions
           </span>
           <span
-            className={`filter ${statusFilter === "CLOSED" ? "active" : ""}`}
-            onClick={() => setStatusFilter("CLOSED")}
+            className={`filter ${statusFilter === "ENDED" ? "active" : ""}`}
+            onClick={() => setStatusFilter("ENDED")}
           >
-            Closed auctions
+            Ended auctions
+          </span>
+          <span
+            className={`filter ${statusFilter === "CANCELLED" ? "active" : ""}`}
+            onClick={() => setStatusFilter("CANCELLED")}
+          >
+            Cancelled auctions
           </span>
         </div>
         <div className="search">
           <input
             type="search"
-            placeholder="Search"
+            placeholder="Search your auctions..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
         </div>
-        <MyAuctions data={data} />
+        {loading ? (
+          <div className="loading">Loading your auctions...</div>
+        ) : (
+          <MyAuctions data={data} />
+        )}
       </div>
     </div>
   );

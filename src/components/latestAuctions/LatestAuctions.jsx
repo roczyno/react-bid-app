@@ -4,18 +4,33 @@ import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import { useEffect, useState } from "react";
-import { publicRequest } from "../../requestMethods";
+import { getAuctions } from "../../redux/apiCalls";
+import { useDispatch } from "react-redux";
 
 const LatestAuctions = () => {
   const [auctions, setAuctions] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const dispatch = useDispatch();
 
   useEffect(() => {
-    const getAuctions = async () => {
-      const res = await publicRequest.get("/auction");
-      setAuctions(res.data.content.content);
+    const fetchAuctions = async () => {
+      try {
+        const response = await getAuctions(dispatch, { 
+          page: 1, 
+          limit: 10,
+          sortBy: 'createdAt',
+          sortOrder: 'desc'
+        });
+        setAuctions(response.auctions || []);
+      } catch (error) {
+        console.error("Error fetching auctions:", error);
+      } finally {
+        setLoading(false);
+      }
     };
-    getAuctions();
-  }, []);
+
+    fetchAuctions();
+  }, [dispatch]);
 
   const settings = {
     dots: true,
@@ -48,16 +63,29 @@ const LatestAuctions = () => {
       }
     ]
   };
+
+  if (loading) {
+    return (
+      <div className="latestAuctions">
+        <h1>Latest Auctions</h1>
+        <div className="loading">Loading auctions...</div>
+      </div>
+    );
+  }
   
   return (
     <div className="latestAuctions">
       <h1>Latest Auctions</h1>
       <div className="container">
-        <Slider {...settings}>
-          {auctions.map((item) => (
-            <LatestAuction key={item.id} item={item} />
-          ))}
-        </Slider>
+        {auctions.length > 0 ? (
+          <Slider {...settings}>
+            {auctions.map((item) => (
+              <LatestAuction key={item.id} item={item} />
+            ))}
+          </Slider>
+        ) : (
+          <div className="no-auctions">No auctions available at the moment.</div>
+        )}
       </div>
     </div>
   );
