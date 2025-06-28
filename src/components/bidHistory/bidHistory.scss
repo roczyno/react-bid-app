@@ -1,0 +1,204 @@
+.bidhistory {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  margin-top: 50px;
+  border-left: 1px solid lightgray;
+  padding-left: 20px;
+  
+  @media (max-width: 1024px) {
+    border-left: none;
+    border-top: 1px solid lightgray;
+    padding-left: 0;
+    padding-top: 20px;
+    margin-top: 20px;
+  }
+  
+  @media (max-width: 768px) {
+    padding-top: 15px;
+    margin-top: 15px;
+  }
+
+  .top {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    margin-bottom: 20px;
+    
+    @media (max-width: 768px) {
+      flex-direction: column;
+      gap: 15px;
+      text-align: center;
+    }
+
+    .title {
+      font-size: 20px;
+      font-weight: bold;
+      
+      @media (max-width: 768px) {
+        font-size: 18px;
+      }
+      
+      @media (max-width: 480px) {
+        font-size: 16px;
+      }
+    }
+    
+    .time {
+      display: flex;
+      flex-direction: column;
+      text-align: center;
+
+      :first-child {
+        color: lightgray;
+        font-size: 14px;
+        
+        @media (max-width: 480px) {
+          font-size: 12px;
+        }
+      }
+      
+      :last-child {
+        font-weight: bold;
+        font-size: 16px;
+        
+        @media (max-width: 480px) {
+          font-size: 14px;
+        }
+      }
+    }
+  }
+
+  .center {
+    border-top: 1px solid lightgray;
+    display: flex;
+    flex-direction: column;
+    max-height: 300px;
+    overflow-y: auto;
+    
+    @media (max-width: 768px) {
+      max-height: 250px;
+    }
+
+    .item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 15px 0;
+      border-bottom: 1px solid #f0f0f0;
+      
+      @media (max-width: 480px) {
+        padding: 10px 0;
+      }
+
+      .bidderInfo {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        
+        @media (max-width: 480px) {
+          gap: 10px;
+        }
+        
+        img {
+          height: 50px;
+          width: 50px;
+          border-radius: 50%;
+          object-fit: cover;
+          
+          @media (max-width: 480px) {
+            height: 40px;
+            width: 40px;
+          }
+        }
+
+        .info {
+          display: flex;
+          flex-direction: column;
+          font-weight: 500;
+
+          .time {
+            color: lightgray;
+            font-size: 12px;
+            
+            @media (max-width: 480px) {
+              font-size: 10px;
+            }
+          }
+        }
+      }
+      
+      .amount {
+        span {
+          font-weight: bold;
+          color: #57b3ac;
+          font-size: 16px;
+          
+          @media (max-width: 480px) {
+            font-size: 14px;
+          }
+        }
+      }
+    }
+  }
+
+  .bottom {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 30px;
+    gap: 15px;
+    
+    @media (max-width: 768px) {
+      margin-top: 20px;
+      gap: 12px;
+    }
+
+    button {
+      width: 80%;
+      max-width: 300px;
+      padding: 12px;
+      border-radius: 5px;
+      color: #ffff;
+      border: none;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+      transition: background-color 0.3s ease;
+      
+      @media (max-width: 768px) {
+        width: 100%;
+        padding: 10px;
+      }
+      
+      @media (max-width: 480px) {
+        font-size: 12px;
+        padding: 8px;
+      }
+    }
+    
+    .btn-yellow {
+      background-color: #ffba02;
+      
+      &:hover {
+        background-color: #e6a602;
+      }
+    }
+    
+    .btn-green {
+      background-color: #57b3ac;
+      
+      &:hover {
+        background-color: #4a9a94;
+      }
+    }
+    
+    .btn-default {
+      background-color: #9a9ea7;
+      
+      &:hover {
+        background-color: #8a8e97;
+      }
+    }
+  }
+}

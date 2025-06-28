@@ -1,0 +1,15 @@
+.auctions {
+  width: 100%;
+  margin: 20px 0;
+  display: flex;
+  justify-content: center;
+  .container {
+    min-width: 1020px;
+    display: flex;
+    gap: 50px;
+    display: flex;
+    .left {
+      width: 100%;
+    }
+  }
+}

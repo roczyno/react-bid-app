@@ -1,0 +1,70 @@
+.auction {
+  width: 100%;
+  border: 1px solid lightgray;
+  border-radius: 5px;
+  .container {
+    width: 100%;
+    margin: 10px;
+    display: flex;
+
+    .left {
+      flex: 1;
+      img {
+        width: 90%;
+        height: 100%;
+        border-radius: 5px;
+        object-fit: cover;
+      }
+    }
+    .right {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      .title {
+        font-weight: 500;
+      }
+
+      .desc {
+        display: flex;
+        flex-direction: row;
+        gap: 5px;
+        font-size: 15px;
+      }
+      .user {
+        display: flex;
+        gap: 5px;
+
+        img {
+          height: 50px;
+          width: 50px;
+          border-radius: 5px;
+          object-fit: cover;
+        }
+
+        .userInfo {
+          display: flex;
+          flex-direction: column;
+
+          .distanceAway {
+            color: lightgray;
+          }
+        }
+      }
+
+      .bottom {
+        margin-top: 10px;
+        display: flex;
+        gap: 150px;
+        align-items: center;
+        button {
+          padding: 10px;
+          background-color: #57b3ac;
+          color: #ffff;
+          border: none;
+          border-radius: 5px;
+          cursor: pointer;
+        }
+      }
+    }
+  }
+}
