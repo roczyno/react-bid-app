@@ -1,0 +1,36 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@100;300;400;500;600;700&display=swap');
+
+* {
+  margin: 0;
+  padding: 0;
+  font-family: "Poppins", sans-serif;
+}
+
+.link {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* Slick carousel overrides */
+.slick-slide > div {
+  margin: 0 10px;
+}
+
+.slick-dots li button:before {
+  color: #57b3ac !important;
+  font-size: 12px !important;
+}
+
+.slick-dots li.slick-active button:before {
+  color: #57b3ac !important;
+}
+
+.slick-prev:before,
+.slick-next:before {
+  color: #57b3ac !important;
+  font-size: 20px !important;
+}

@@ -1,4 +1,3 @@
-import "./latestAuctions.scss";
 import LatestAuction from "../latestAuction/LatestAuction";
 import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
@@ -66,17 +65,19 @@ const LatestAuctions = () => {
 
   if (loading) {
     return (
-      <div className="latestAuctions">
-        <h1>Latest Auctions</h1>
-        <div className="loading">Loading auctions...</div>
+      <div className="min-h-[500px] flex flex-col px-5 mb-16 md:mb-24">
+        <h1 className="mb-5 text-center text-2xl md:text-3xl font-medium">Latest Auctions</h1>
+        <div className="flex justify-center items-center flex-1">
+          <div className="text-lg text-gray-500">Loading auctions...</div>
+        </div>
       </div>
     );
   }
   
   return (
-    <div className="latestAuctions">
-      <h1>Latest Auctions</h1>
-      <div className="container">
+    <div className="min-h-[500px] flex flex-col px-5 mb-16 md:mb-24">
+      <h1 className="mb-5 text-center text-2xl md:text-3xl font-medium">Latest Auctions</h1>
+      <div className="flex-1">
         {auctions.length > 0 ? (
           <Slider {...settings}>
             {auctions.map((item) => (
@@ -84,7 +85,9 @@ const LatestAuctions = () => {
             ))}
           </Slider>
         ) : (
-          <div className="no-auctions">No auctions available at the moment.</div>
+          <div className="flex justify-center items-center h-64">
+            <div className="text-lg text-gray-500">No auctions available at the moment.</div>
+          </div>
         )}
       </div>
     </div>

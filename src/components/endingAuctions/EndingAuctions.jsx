@@ -1,4 +1,3 @@
-import "./endingAuctions.scss";
 import EndingAuction from "../endingAuction/EndingAuction";
 import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
@@ -118,9 +117,9 @@ const EndingAuctions = () => {
   };
   
   return (
-    <div className="endingAuctions">
-      <h1>Ending Soon Auctions</h1>
-      <div className="container">
+    <div className="min-h-[500px] flex flex-col px-5 mb-12 md:mb-16">
+      <h1 className="mb-5 text-center text-2xl md:text-3xl font-medium">Ending Soon Auctions</h1>
+      <div className="flex-1">
         <Slider {...settings}>
           {data.map((item) => (
             <EndingAuction key={item.id} item={item} />
