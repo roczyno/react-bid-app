@@ -1,10 +1,16 @@
 import express from 'express';
+import { 
+  cacheAuctionBids, 
+  cacheUserBids,
+  invalidateBidCache 
+} from '../middleware/cache.js';
+import { cache } from '../utils/cache.js';
 import { logger } from '../utils/logger.js';
 
 const router = express.Router();
 
-// Place a bid
-router.post('/', async (req, res) => {
+// Place a bid - with cache invalidation
+router.post('/', invalidateBidCache(), async (req, res) => {
   try {
     const { auctionId, amount } = req.body;
 
@@ -98,6 +104,14 @@ router.post('/', async (req, res) => {
       return { bid, updatedAuction };
     });
 
+    // Invalidate related caches
+    await Promise.all([
+      cache.del(cache.keys.auction(auctionId)),
+      cache.delPattern('auctions:*'),
+      cache.delPattern(`auction_bids:${auctionId}:*`),
+      cache.delPattern(`user_bids:${req.user.id}:*`)
+    ]);
+
     // Emit real-time bid update
     req.io.to(`auction_${auctionId}`).emit('newBid', {
       bid: result.bid,
@@ -141,8 +155,8 @@ router.post('/', async (req, res) => {
   }
 });
 
-// Get user's bids
-router.get('/my-bids', async (req, res) => {
+// Get user's bids - with caching
+router.get('/my-bids', cacheUserBids(300), async (req, res) => {
   try {
     const { page = 1, limit = 10, status } = req.query;
     const skip = (parseInt(page) - 1) * parseInt(limit);
@@ -223,8 +237,8 @@ router.get('/my-bids', async (req, res) => {
   }
 });
 
-// Get bid history for an auction
-router.get('/auction/:auctionId', async (req, res) => {
+// Get bid history for an auction - with caching
+router.get('/auction/:auctionId', cacheAuctionBids(60), async (req, res) => {
   try {
     const { auctionId } = req.params;
     const { page = 1, limit = 20 } = req.query;

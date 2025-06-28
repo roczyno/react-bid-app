@@ -1,10 +1,11 @@
 import express from 'express';
+import { cacheNotifications, invalidateUserCache } from '../middleware/cache.js';
 import { logger } from '../utils/logger.js';
 
 const router = express.Router();
 
-// Get user notifications
-router.get('/', async (req, res) => {
+// Get user notifications - with caching
+router.get('/', cacheNotifications(60), async (req, res) => {
   try {
     const { page = 1, limit = 20, unreadOnly = false } = req.query;
     const skip = (parseInt(page) - 1) * parseInt(limit);
@@ -43,8 +44,8 @@ router.get('/', async (req, res) => {
   }
 });
 
-// Mark notification as read
-router.put('/:id/read', async (req, res) => {
+// Mark notification as read - with cache invalidation
+router.put('/:id/read', invalidateUserCache(), async (req, res) => {
   try {
     const notification = await req.prisma.notification.findUnique({
       where: { id: req.params.id }
@@ -73,8 +74,8 @@ router.put('/:id/read', async (req, res) => {
   }
 });
 
-// Mark all notifications as read
-router.put('/mark-all-read', async (req, res) => {
+// Mark all notifications as read - with cache invalidation
+router.put('/mark-all-read', invalidateUserCache(), async (req, res) => {
   try {
     const result = await req.prisma.notification.updateMany({
       where: { userId: req.user.id, isRead: false },
@@ -91,8 +92,8 @@ router.put('/mark-all-read', async (req, res) => {
   }
 });
 
-// Delete notification
-router.delete('/:id', async (req, res) => {
+// Delete notification - with cache invalidation
+router.delete('/:id', invalidateUserCache(), async (req, res) => {
   try {
     const notification = await req.prisma.notification.findUnique({
       where: { id: req.params.id }

@@ -15,6 +15,7 @@ import bidRoutes from './routes/bids.js';
 import messageRoutes from './routes/messages.js';
 import paymentRoutes from './routes/payments.js';
 import notificationRoutes from './routes/notifications.js';
+import cacheRoutes from './routes/cache.js';
 
 // Import middleware
 import { authenticateToken } from './middleware/auth.js';
@@ -23,6 +24,9 @@ import { logger } from './utils/logger.js';
 
 // Import socket handlers
 import { setupSocketHandlers } from './socket/socketHandlers.js';
+
+// Import cache
+import { cache, warmCache } from './utils/cache.js';
 
 dotenv.config();
 
@@ -70,13 +74,16 @@ app.use('/api/v1/bids', authenticateToken, bidRoutes);
 app.use('/api/v1/messages', authenticateToken, messageRoutes);
 app.use('/api/v1/payments', authenticateToken, paymentRoutes);
 app.use('/api/v1/notifications', authenticateToken, notificationRoutes);
+app.use('/api/v1/cache', cacheRoutes);
 
 // Health check
 app.get('/api/v1/health', (req, res) => {
+  const cacheStats = cache.getStats();
   res.json({ 
     status: 'OK', 
     timestamp: new Date().toISOString(),
-    uptime: process.uptime()
+    uptime: process.uptime(),
+    cache: cacheStats
   });
 });
 
@@ -91,26 +98,61 @@ app.use('*', (req, res) => {
   res.status(404).json({ error: 'Route not found' });
 });
 
+// Initialize cache and warm it up
+const initializeServer = async () => {
+  try {
+    logger.info('Initializing server...');
+    
+    // Warm up cache with popular data
+    if (cache.cacheEnabled) {
+      logger.info('Warming up cache...');
+      await warmCache.all();
+    }
+    
+    logger.info('Server initialization complete');
+  } catch (error) {
+    logger.error('Server initialization error:', error);
+  }
+};
+
 // Graceful shutdown
-process.on('SIGTERM', async () => {
-  logger.info('SIGTERM received, shutting down gracefully');
-  await prisma.$disconnect();
-  server.close(() => {
-    logger.info('Process terminated');
-  });
-});
+const gracefulShutdown = async (signal) => {
+  logger.info(`${signal} received, shutting down gracefully`);
+  
+  try {
+    // Close server
+    server.close(() => {
+      logger.info('HTTP server closed');
+    });
+    
+    // Disconnect from database
+    await prisma.$disconnect();
+    logger.info('Database disconnected');
+    
+    // Close cache connections
+    if (cache.redis) {
+      await cache.redis.quit();
+      logger.info('Redis connection closed');
+    }
+    
+    logger.info('Graceful shutdown complete');
+    process.exit(0);
+  } catch (error) {
+    logger.error('Error during graceful shutdown:', error);
+    process.exit(1);
+  }
+};
 
-process.on('SIGINT', async () => {
-  logger.info('SIGINT received, shutting down gracefully');
-  await prisma.$disconnect();
-  server.close(() => {
-    logger.info('Process terminated');
-  });
-});
+process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
+process.on('SIGINT', () => gracefulShutdown('SIGINT'));
 
-server.listen(PORT, () => {
+// Start server
+server.listen(PORT, async () => {
   logger.info(`Server running on port ${PORT}`);
   logger.info(`Environment: ${process.env.NODE_ENV}`);
+  logger.info(`Cache enabled: ${cache.cacheEnabled}`);
+  
+  await initializeServer();
 });
 
 export default app;

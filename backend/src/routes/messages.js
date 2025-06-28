@@ -1,10 +1,15 @@
 import express from 'express';
+import { 
+  cacheMessages, 
+  cacheConversations,
+  invalidateMessageCache 
+} from '../middleware/cache.js';
 import { logger } from '../utils/logger.js';
 
 const router = express.Router();
 
-// Send a message
-router.post('/', async (req, res) => {
+// Send a message - with cache invalidation
+router.post('/', invalidateMessageCache(), async (req, res) => {
   try {
     const { receiverId, content, auctionId, type = 'TEXT' } = req.body;
 
@@ -98,8 +103,8 @@ router.post('/', async (req, res) => {
   }
 });
 
-// Get conversation between two users
-router.get('/conversation/:userId', async (req, res) => {
+// Get conversation between two users - with caching
+router.get('/conversation/:userId', cacheMessages(300), async (req, res) => {
   try {
     const { userId } = req.params;
     const { page = 1, limit = 50, auctionId } = req.query;
@@ -166,8 +171,8 @@ router.get('/conversation/:userId', async (req, res) => {
   }
 });
 
-// Get all conversations for a user
-router.get('/conversations', async (req, res) => {
+// Get all conversations for a user - with caching
+router.get('/conversations', cacheConversations(300), async (req, res) => {
   try {
     const { page = 1, limit = 20 } = req.query;
     const skip = (parseInt(page) - 1) * parseInt(limit);
